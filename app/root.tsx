@@ -1,4 +1,5 @@
 import {
+  Form,
   isRouteErrorResponse,
   Links,
   Meta,
@@ -9,6 +10,7 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import appStylesHref from "./app.css?url";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -23,14 +25,16 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+// The Layout component is a special export for the root route.
+// It acts as your document's "app shell" for all route components, HydrateFallback, and ErrorBoundary
+// For more information, see https://reactrouter.com/explanation/special-files#layout-export
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
+        <link rel="stylesheet" href={appStylesHref} />
       </head>
       <body>
         {children}
@@ -42,9 +46,42 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <>
+      <div id="sidebar">
+        <h1>React Router Contacts</h1>
+        <div>
+          <Form id="search-form" role="search">
+            <input
+              aria-label="Search contacts"
+              id="q"
+              name="q"
+              placeholder="Search"
+              type="search"
+            />
+            <div aria-hidden hidden={true} id="search-spinner" />
+          </Form>
+          <Form method="post">
+            <button type="submit">New</button>
+          </Form>
+        </div>
+        <nav>
+          <ul>
+            <li>
+              <a href={`/contacts/1`}>Your Name</a>
+            </li>
+            <li>
+              <a href={`/contacts/2`}>Your Friend</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </>
+  );
 }
 
+// The top most error boundary for the app, rendered when your app throws an error
+// For more information, see https://reactrouter.com/start/framework/route-module#errorboundary
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";
@@ -62,11 +99,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
+    <main id="error-page">
       <h1>{message}</h1>
       <p>{details}</p>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre>
           <code>{stack}</code>
         </pre>
       )}
